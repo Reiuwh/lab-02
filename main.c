@@ -43,4 +43,71 @@ int main() {
 		"flower",
 		"meat",
 		"pickaxe" };
+	int choice = -1;
+
+	while (1) {
+		printf("\n === МЕНЮ ФЕРМЕРА ===\n"
+			"[0] Выход\n"
+			"[1] Посмотреть на часы\n"
+			"[2] Промотать время(поработать)\n"
+			"[3] Посмотреть инвентарь\n"
+			"[4] Положить предмет в слот\n"
+			"[5] Выбросить предмет\n"
+			"[6] Количество ресурсов\n");
+
+
+		choice = safe_input_int("Выберите пункт:");
+		switch (choice) {
+		case 0:
+			printf("Выход из игры.До скорой встречи!\n");
+			return 0;
+		case 1:
+			printf("Текущее время: День %d , %02d:00\n", current_day, current_hour);
+			break;
+		case 2:
+			hours_to_work = safe_input_int("Сколько часов вы хотите поработать?");
+
+			if (hours_to_work < 0) {
+				printf("Ошибка:Количество часов не может быть отрицательным!\n");
+				break;
+			}
+
+			current_hour += hours_to_work;
+			while (current_hour >= 24) {
+				current_hour -= 24;
+				current_day++;
+			}
+			printf("Вы успешно поработали! Текущее время : День %d,%02d:00\n", current_day, current_hour);
+			break;
+
+		case 3:
+			printf("Содержимое рюкзака\n");
+			for (int i = 0; i < Inventory_size; i++) {
+				printf("Слот %d:[%s]",i, names[inventory[i]]);
+			}
+			break;
+		case 4:
+			printf("Введите номер предмета:\n");
+			scanf_s("%d", &predmet);
+			printf("Введите номер слота:\n");
+			scanf_s("%d", &slot);
+			if (predmet && slot >= 0 && predmet && slot < 10) {
+				inventory[slot] = predmet;
+			}
+
+			else {
+				printf("Введите число от 1 до 9!\n");
+			}
+		case 5:
+			item_to_drop = safe_input_int("Введите id предмета:\n");
+
+			if (item_to_drop <= 0 || item_to_drop >= Inventory_size) {
+				printf("Ошибка!Такого слота не существует!Введите от 1 до %d.\n", Inventory_size - 1);
+				break;
+			}
+			inventory[item_to_drop] = "empthy_item";
+			printf("Слот %d очищен.\n", item_to_drop);
+			break;
+		}
+	}
 }
