@@ -130,8 +130,11 @@ int main() {
 			else {
 				printf("Предмет с тким id не найден в инвентаре.\n");
 			}
-				break;
-			
+			break;
+		default:
+			printf("Ошибка! Выберите пункт меню 1-6 \n");
+			break;
 		}
 	}
+	return 0;
 }
