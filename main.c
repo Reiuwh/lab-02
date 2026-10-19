@@ -1,7 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
+#include <string.h>
 #define Inventory_size 10
+#define MAX_ITEMS  10
+#define MAX_NAME_LEN 32
+
+char item_names[MAX_ITEMS][MAX_NAME_LEN]; //ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+char farmer_name[MAX_NAME_LEN];
+int inventory[Inventory_size] = { 0,1,2,3,0,1,0,1,0,0 };
+int current_day = 1;                        
+int current_hour = 8;
 //защита от дурака
 void clear_input() {
 	int c;
@@ -22,16 +31,29 @@ int safe_input_int(const char* prompt) {
 	} while (result != 1);
 	return value;
 }
+//ФУНКЦИЯ БЕЗОПАСНОГО ВВОДА СТРОКИ
+void safe_input_string(const char* prompt, char* buffer, int max_len) { //читаем стороку целиком(с пробелами) убирая enter в конце 
+	printf("%s", prompt); //печатаем подсказку
+
+	if (fgets(buffer, max_len, stdin) == NULL) {
+		buffer[0] = '\0'; //если ошибка делаем строку пустой
+		return;
+	}
+	// fgets оставляет '\n' в конце строки нужно его убрать
+	int len = strlen(buffer);
+	if (len > 0 && buffer[len - 1] == '\n') {
+		buffer[len - 1] = '\0'; //заменяет enter на конец строки
+	}
+}
 int main() {
 	SetConsoleOutputCP(CP_UTF8);
 	SetConsoleCP(CP_UTF8);
-	int current_day = 1;                        //вводим переменные
-	int current_hour = 8;
+	
 	int hours_to_work = 0;
 	int predmet = 0;
 	int slot = 0;
 	int item_to_drop = 0;
-	int inventory[Inventory_size] = { 0,1,2,3,0,0,0,0,0,0 };
+	int target_id = 0;
 	const char* names[Inventory_size] = {
 		"empty_item",
 		"wood",
@@ -42,8 +64,9 @@ int main() {
 		"can",
 		"flower",
 		"meat",
-		"pickaxe" };
-	int choice = -1;
+		"pickaxe"
+	};
+		int choice = -1;
 
 	while (1) {
 		printf("\n === МЕНЮ ФЕРМЕРА ===\n"
@@ -53,7 +76,7 @@ int main() {
 			"[3] Посмотреть инвентарь\n"
 			"[4] Положить предмет в слот\n"
 			"[5] Выбросить предмет\n"
-			"[6] Количество ресурсов\n");
+			"[6] Отчистка от мусора\n");
 
 
 		choice = safe_input_int("Выберите пункт:");
@@ -83,7 +106,7 @@ int main() {
 		case 3:
 			printf("Содержимое рюкзака\n");
 			for (int i = 0; i < Inventory_size; i++) {
-				printf("Слот %d:[%s]",i, names[inventory[i]]);
+				printf("Слот %d:[%s]", i, names[inventory[i]]);
 			}
 			break;
 		case 4:
@@ -105,9 +128,35 @@ int main() {
 				printf("Ошибка!Такого слота не существует!Введите от 1 до %d.\n", Inventory_size - 1);
 				break;
 			}
-			inventory[item_to_drop] = "empthy_item";
+			inventory[item_to_drop] = "empty_item";
 			printf("Слот %d очищен.\n", item_to_drop);
+			break;
+
+		case 6:
+			target_id = safe_input_int("Введите id предмета для отчистки:");
+			if (target_id <= 0 || target_id >= Inventory_size) {
+				printf("Ошибка!Неверный  id предмета.\n");
+				break;
+			}
+			int clean_count = 0;
+
+			for (int i = 0; i < Inventory_size; i++) {
+				if (inventory[i] == target_id) {
+					inventory[i] = "empty_item";
+					clean_count++;
+				}
+			}
+			if (clean_count > 0) {
+				printf("Очищено слотов: %d\n", clean_count);
+			}
+			else {
+				printf("Предмет с тким id не найден в инвентаре.\n");
+			}
+			break;
+		default:
+			printf("Ошибка! Выберите пункт меню 1-6 \n");
 			break;
 		}
 	}
+	return 0;
 }
