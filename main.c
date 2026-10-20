@@ -99,6 +99,79 @@ void print_inventory() {
 		printf("Слот %d: [%d] - %s\n", i, inventory[i], item_names[inventory[i]]);
 	}
 }
+// ФУНКЦИЯ ПОИСКА ПРЕДМЕТА ПО НАЗВАНИЮ(Пункт 7)
+void search_item_by_name() {
+	char search_name[MAX_NAME_LEN];  // Сюда запишем название для поиска
+
+	// Просим пользователя ввести название
+	safe_input_string("Введите название предмета: ", search_name, MAX_NAME_LEN);
+
+	// Ищем ID, которому соответствует это название
+	int target_id = -1;  // -1 означает "не найдено"
+	for (int i = 0; i < MAX_ITEMS; i++) {
+		// strcmp сравнивает строки. Если равны - возвращает 0.
+		if (strcmp(item_names[i], search_name) == 0) {
+			target_id = i;  // Запоминаем ID
+			break;          // Выходим из цикла (нашли)
+		}
+	}
+
+	// Если не нашли название в каталоге
+	if (target_id == -1) {
+		printf("»> Предмет с названием '%s' не найден в каталоге.\n", search_name);
+		return;
+	}
+
+	// Ищем этот ID в рюкзаке
+	printf("Предмет '%s' (ID: %d) найден в слотах: ", search_name, target_id);
+	int found = 0;  // Флаг: нашли ли хоть один слот
+	for (int i = 0; i < Inventory_size; i++) {
+		if (inventory[i] == target_id) {
+			printf("%d ", i);  // Печатаем номер слота
+			found = 1;         // Запоминаем, что нашли
+		}
+	}
+
+	if (found == 0) {
+		printf("(нет в рюкзаке)");
+	}
+	printf("\n");
+}
+
+// ФУНКЦИЯ ЗАПИСИ В ДНЕВНИК (Пункт 8)
+
+void write_diary() {
+	// Открываем файл diary.txt в режиме "a" (дозапись в конец)
+	// Если файла нет - он создастся автоматически
+	FILE* file = fopen("diary.txt", "a");
+
+	if (file == NULL) {
+		printf("»> Ошибка: не удалось открыть diary.txt\n");
+		return;
+	}
+
+	// Записываем сводку в файл
+	fprintf(file, "=== Запись в дневнике ===\n");
+	fprintf(file, "Фермер: %s\n", farmer_name);
+	fprintf(file, "День %d, время: %02d:00\n", current_day, current_hour);
+	fprintf(file, "Инвентарь:\n");
+
+	// Записываем только непустые слоты
+	for (int i = 0;
+
+
+		i < Inventory_size; i++) {
+		if (inventory[i] != 0) {  // 0 - это пустой слот
+			fprintf(file, "  Слот %d: %s\n", i, item_names[inventory[i]]);
+		}
+	}
+
+	fprintf(file, "========================\n\n");
+
+	fclose(file);  // Закрываем файл
+	printf("»> Состояние записано в diary.txt!\n");
+}
+
 
 int main() {
 	SetConsoleOutputCP(CP_UTF8);
@@ -130,7 +203,7 @@ int main() {
 	while (1) {
 		printf("\n === МЕНЮ ФЕРМЕРА ===\n");
 			printf("Привет, %s! \n ", farmer_name);
-			printf("[0] Выход\n"
+		printf("[0] Выход\n"
 			"[1] Посмотреть на часы\n"
 			"[2] Промотать время(поработать)\n"
 			"[3] Посмотреть инвентарь\n"
@@ -216,7 +289,16 @@ int main() {
 		default:
 			printf("Ошибка! Выберите пункт меню 1-6 \n");
 			break;
+
+		case 7:
+			search_item_by_name();
+			break;
+
+		case 8:
+			write_diary();
+			break;
 		}
+
 	}
 	return 0;
 }
