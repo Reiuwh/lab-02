@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
@@ -45,6 +46,60 @@ void safe_input_string(const char* prompt, char* buffer, int max_len) { //чит
 		buffer[len - 1] = '\0'; //заменяет enter на конец строки
 	}
 }
+void load_items(const char* filename) {
+	// Сначала заполним массив названиями по умолчанию
+	// (на случай, если файл не найдётся)
+	strcpy(item_names[0], "Пусто");
+	strcpy(item_names[1], "Дерево");
+	strcpy(item_names[2], "Камень");
+	strcpy(item_names[3], "Семена");
+	strcpy(item_names[4], "Железо");
+	strcpy(item_names[5], "Золото");
+	strcpy(item_names[6], "Алмаз");
+	strcpy(item_names[7], "Уголь");
+	strcpy(item_names[8], "Палка");
+	strcpy(item_names[9], "Веревка");
+
+	FILE * file = fopen(filename, "r");
+
+	// Если файл не открылся - сообщаем и выходим из функции
+	if (file == NULL) {
+		printf("»> Файл %s не найден. Использую названия по умолчанию.\n", filename);
+		return;  // Выходим, но названия по умолчанию уже стоят
+	}
+
+	// Читаем файл построчно
+	char line[256];  // Буфер для одной строки
+	while (fgets(line, sizeof(line), file) != NULL) {
+		int id;                  // ID предмета (число)
+		char name[MAX_NAME_LEN]; // Название предмета
+
+		// sscanf разбирает строку формата "0 Пусто" на два значения
+		// %d - читает число, %31[^\n] - читает строку до конца строки (до Enter)
+		if (sscanf(line, "%d %31[^\n]", &id, name) == 2) {
+			// Проверяем, что ID в допустимых пределах
+			if (id >= 0 && id < MAX_ITEMS) {
+				strcpy(item_names[id], name);  // Копируем название в каталог
+			}
+		}
+	}
+
+	fclose(file); 
+	printf("»> Названия предметов загружены из %s\n", filename);
+}
+
+// ФУНКЦИЯ ВЫВОДА ИНВЕНТАРЯ
+void print_inventory() {
+	printf("--- Содержимое рюкзака ---\n");
+
+	// Проходим по всем 10 слотам
+	for (int i = 0; i < Inventory_size; i++) {
+		// inventory[i] - это ID предмета в слоте i
+		// item_names[ID] - это название предмета с таким ID
+		printf("Слот %d: [%d] - %s\n", i, inventory[i], item_names[inventory[i]]);
+	}
+}
+
 int main() {
 	SetConsoleOutputCP(CP_UTF8);
 	SetConsoleCP(CP_UTF8);
@@ -54,30 +109,37 @@ int main() {
 	int slot = 0;
 	int item_to_drop = 0;
 	int target_id = 0;
-	const char* names[Inventory_size] = {
-		"empty_item",
-		"wood",
-		"stone",
-		"seeds",
-		"coal",
-		"apple",
-		"can",
-		"flower",
-		"meat",
-		"pickaxe"
-	};
-		int choice = -1;
+	
+
+	load_items("items.txt");
+
+	printf("Введите имя фермера: ");
+	safe_input_string("", farmer_name, MAX_NAME_LEN);
+	// Если имя пустое - ставим "Фермер"
+	if (strlen(farmer_name) == 0) {
+		strcpy(farmer_name, "Фермер");
+	}
+
+	int choice = -1;
+
+	// Если имя пустое - ставим "Фермер"
+	if (strlen(farmer_name) == 0) {
+		strcpy(farmer_name, "Фермер");
+	}
 
 	while (1) {
-		printf("\n === МЕНЮ ФЕРМЕРА ===\n"
-			"[0] Выход\n"
+		printf("\n === МЕНЮ ФЕРМЕРА ===\n");
+			printf("Привет, %s! \n ", farmer_name);
+			printf("[0] Выход\n"
 			"[1] Посмотреть на часы\n"
 			"[2] Промотать время(поработать)\n"
 			"[3] Посмотреть инвентарь\n"
 			"[4] Положить предмет в слот\n"
 			"[5] Выбросить предмет\n"
-			"[6] Отчистка от мусора\n");
-
+			"[6] Отчистка от мусора\n"
+			"[7] Поиск предмета по названию\n"
+			"[8] Записать состояние в дневник\n"
+			"[9] Обработать письмо NPC\n");
 
 		choice = safe_input_int("Выберите пункт:");
 		switch (choice) {
@@ -104,11 +166,9 @@ int main() {
 			break;
 
 		case 3:
-			printf("Содержимое рюкзака\n");
-			for (int i = 0; i < Inventory_size; i++) {
-				printf("Слот %d:[%s]", i, names[inventory[i]]);
-			}
+			print_inventory();
 			break;
+
 		case 4:
 			printf("Введите номер предмета:\n");
 			scanf_s("%d", &predmet);
