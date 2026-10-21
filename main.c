@@ -171,6 +171,110 @@ void write_diary() {
 	fclose(file);  // Закрываем файл
 	printf("»> Состояние записано в diary.txt!\n");
 }
+//ШАБЛОНИЗАТОР ДИАЛОГОВ
+
+void process_letter() {
+	// Открываем input.txt для чтения
+	FILE* input = fopen("input.txt", "r");
+	if (input == NULL) {
+		printf("»> Ошибка: не удалось открыть input.txt\n");
+		return;
+	}
+
+	// Открываем output.txt для записи (режим "w" - перезапись)
+	FILE* output = fopen("output.txt", "w");
+	if (output == NULL) {
+		printf("»> Ошибка: не удалось создать output.txt\n");
+		fclose(input);
+		return;
+	}
+
+	printf("--- Результат обработки письма ---\n");
+
+	char line[2048];  // Буфер для одной строки из файла
+
+	// Читаем файл построчно
+	while (fgets(line, sizeof(line), input) != NULL) {
+		// Здесь мы будем собирать результат
+		char result[4096];  // Буфер для результата (побольше, т.к. теги заменяются)
+		int r = 0;          // Индекс для записи в result
+
+		// Проходим по каждому символу строки
+		for (int i = 0; line[i] != '\0'; i++) {
+
+			// Если встретили '<' - возможно, это тег
+			if (line[i] == '<') {
+
+				// Проверяем, не "<NAME>" ли это
+				// Сравниваем следующие символы вручную
+				if (line[i + 1] == 'N' && line[i + 2] == 'A' &&
+					line[i + 3] == 'M' && line[i + 4] == 'E' &&
+					line[i + 5] == '>') {
+					// Это тег <NAME>. Копируем имя фермера в результат.
+					for (int j = 0; farmer_name[j] != '\0'; j++) {
+						result[r] = farmer_name[j];
+						r++;
+					}
+					i = i + 5;  // Пропускаем 6 символов тега (цикл ещё +1)
+					continue;   // Переходим к следующему символу
+				}
+
+
+					// Проверяем, не "<DAY>" ли это
+				else if (line[i + 1] == 'D' && line[i + 2] == 'A' &&
+					line[i + 3] == 'Y' && line[i + 4] == '>') {
+					// Преобразуем число current_day в строку
+					char day_str[10];
+					sprintf(day_str, "%d", current_day);
+
+					// Копируем строку с днём в результат
+					for (int j = 0; day_str[j] != '\0'; j++) {
+						result[r] = day_str[j];
+						r++;
+					}
+					i = i + 4;  // Пропускаем 5 символов тега
+					continue;
+				}
+
+				// Проверяем, не "<ITEM>" ли это
+				else if (line[i + 1] == 'I' && line[i + 2] == 'T' &&
+					line[i + 3] == 'E' && line[i + 4] == 'M' &&
+					line[i + 5] == '>') {
+					// Берём название предмета из нулевого слота
+					char* item_str = item_names[inventory[0]];
+
+					// Копируем его в результат
+					for (int j = 0; item_str[j] != '\0'; j++) {
+						result[r] = item_str[j];
+						r++;
+					}
+					i = i + 5;  // Пропускаем 6 символов тега
+					continue;
+				}
+
+				// Если это не <NAME>, не <DAY> и не <ITEM> -
+				// просто копируем '<' как обычный символ
+				}
+
+				// Обычный символ - просто копируем в результат
+				result[r] = line[i];
+				r++;
+			}
+
+			// Завершаем строку нуль-терминатором
+			result[r] = '\0';
+
+			// Выводим результат на экран и записываем в файл
+			printf("%s", result);
+			fprintf(output, "%s", result);
+		}
+
+		fclose(input);   // Закрываем входной файл
+		fclose(output);  // Закрываем выходной файл
+
+		printf("\n»> Результат сохранён в output.txt\n");
+	}
+
 
 
 int main() {
@@ -286,10 +390,7 @@ int main() {
 				printf("Предмет с тким id не найден в инвентаре.\n");
 			}
 			break;
-		default:
-			printf("Ошибка! Выберите пункт меню 1-6 \n");
-			break;
-
+		
 		case 7:
 			search_item_by_name();
 			break;
@@ -297,7 +398,16 @@ int main() {
 		case 8:
 			write_diary();
 			break;
+
+		case 9:
+			process_letter();
+			break;
+
+		default:
+			printf("»> Такого пункта нет. Попробуйте снова.\n");
+			break;
 		}
+		
 
 	}
 	return 0;
