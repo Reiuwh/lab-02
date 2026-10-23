@@ -6,11 +6,12 @@
 #define Inventory_size 10
 #define MAX_ITEMS  10
 #define MAX_NAME_LEN 32
+#define EMPTY_ITEM 0
 
 char item_names[MAX_ITEMS][MAX_NAME_LEN]; //ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
 char farmer_name[MAX_NAME_LEN];
 int inventory[Inventory_size] = { 0,1,2,3,0,1,0,1,0,0 };
-int current_day = 1;                        
+int current_day = 1;
 int current_hour = 8;
 //защита от дурака
 void clear_input() {
@@ -60,11 +61,11 @@ void load_items(const char* filename) {
 	strcpy(item_names[8], "Палка");
 	strcpy(item_names[9], "Веревка");
 
-	FILE * file = fopen(filename, "r");
+	FILE* file = fopen(filename, "r");
 
 	// Если файл не открылся - сообщаем и выходим из функции
 	if (file == NULL) {
-		printf("»> Файл %s не найден. Использую названия по умолчанию.\n", filename);
+		printf(" Файл %s не найден. Использую названия по умолчанию.\n", filename);
 		return;  // Выходим, но названия по умолчанию уже стоят
 	}
 
@@ -84,7 +85,7 @@ void load_items(const char* filename) {
 		}
 	}
 
-	fclose(file); 
+	fclose(file);
 	printf("»> Названия предметов загружены из %s\n", filename);
 }
 
@@ -99,11 +100,78 @@ void print_inventory() {
 		printf("Слот %d: [%d] - %s\n", i, inventory[i], item_names[inventory[i]]);
 	}
 }
+void show_time(int day, int hour) {
+	printf("Текущее время: День %d , %02d:00\n", day, hour);
+}
+
+void skip_time(int* day, int* hour) {
+	int hours = safe_input_int("Сколько часов вы хотите поработать? ");
+	if (hours < 0) {
+		printf("»> Ошибка: количество часов не может быть отрицательным!\n");
+		return;
+	}
+	*hour += hours;
+	while (*hour >= 24) {
+		*hour -= 24;
+		(*day)++;
+	}
+	printf("Вы поработали! Теперь: День %d, %02d:00\n", *day, *hour);
+}
+
+void show_inventory(int inv[], char names[][MAX_NAME_LEN]) {
+	printf("--- Содержимое рюкзака ---\n");
+	for (int i = 0; i < Inventory_size; i++) {
+		printf("Слот %d: [%d] - %s\n", i, inv[i], names[inv[i]]);
+	}
+}
+
+void put_item(int inv[]) {
+	int index = safe_input_int("Введите индекс слота (0-9): ");
+	if (index < 0 || index >= Inventory_size) {
+		printf("Ошибка: Индекс должен быть от 0 до %d.\n", Inventory_size - 1);
+		return;
+	}
+	int item_id = safe_input_int("Введите ID предмета: ");
+	inv[index] = item_id;
+	printf("Предмет успешно положен в слот %d.\n", index);
+}
+
+void discard_item(int inv[]) {
+	int index = safe_input_int("Введите индекс слота для очистки (0-9): ");
+	if (index < 0 || index >= Inventory_size) {
+		printf("»> Ошибка: Индекс должен быть от 0 до %d.\n", Inventory_size - 1);
+		return;
+	}
+	inv[index] = EMPTY_ITEM;
+	printf("Слот %d очищен.\n", index);
+}
+
+void clean_trash(int inv[]) {
+	int target_id = safe_input_int("Введите ID предмета для очистки: ");
+	if (target_id == EMPTY_ITEM) {
+		printf("»> Ошибка: Нельзя очищать пустые слоты!\n");
+		return;
+	}
+	int clean_count = 0;
+	for (int i = 0; i < Inventory_size; i++) {
+		if (inv[i] == target_id) {
+			inv[i] = EMPTY_ITEM;
+			clean_count++;
+		}
+	}
+	if (clean_count > 0) {
+		printf("Очищено слотов: %d\n", clean_count);
+	}
+	else {
+		printf("Предмет с таким ID не найден.\n");
+	}
+}
+
 // ФУНКЦИЯ ПОИСКА ПРЕДМЕТА ПО НАЗВАНИЮ(Пункт 7)
 void search_item_by_name() {
 	char search_name[MAX_NAME_LEN];  // Сюда запишем название для поиска
 
-	// Просим пользователя ввести название
+
 	safe_input_string("Введите название предмета: ", search_name, MAX_NAME_LEN);
 
 	// Ищем ID, которому соответствует это название
@@ -141,12 +209,11 @@ void search_item_by_name() {
 // ФУНКЦИЯ ЗАПИСИ В ДНЕВНИК (Пункт 8)
 
 void write_diary() {
-	// Открываем файл diary.txt в режиме "a" (дозапись в конец)
-	// Если файла нет - он создастся автоматически
+	
 	FILE* file = fopen("diary.txt", "a");
 
 	if (file == NULL) {
-		printf("»> Ошибка: не удалось открыть diary.txt\n");
+		printf(" Ошибка: не удалось открыть diary.txt\n");
 		return;
 	}
 
@@ -181,7 +248,7 @@ void process_letter() {
 		return;
 	}
 
-	// Открываем output.txt для записи (режим "w" - перезапись)
+	// Открываем output.txt для записи 
 	FILE* output = fopen("output.txt", "w");
 	if (output == NULL) {
 		printf("»> Ошибка: не удалось создать output.txt\n");
@@ -220,7 +287,7 @@ void process_letter() {
 				}
 
 
-					// Проверяем, не "<DAY>" ли это
+				// Проверяем, не "<DAY>" ли это
 				else if (line[i + 1] == 'D' && line[i + 2] == 'A' &&
 					line[i + 3] == 'Y' && line[i + 4] == '>') {
 					// Преобразуем число current_day в строку
@@ -254,39 +321,39 @@ void process_letter() {
 
 				// Если это не <NAME>, не <DAY> и не <ITEM> -
 				// просто копируем '<' как обычный символ
-				}
-
-				// Обычный символ - просто копируем в результат
-				result[r] = line[i];
-				r++;
 			}
 
-			// Завершаем строку нуль-терминатором
-			result[r] = '\0';
-
-			// Выводим результат на экран и записываем в файл
-			printf("%s", result);
-			fprintf(output, "%s", result);
+			// Обычный символ - просто копируем в результат
+			result[r] = line[i];
+			r++;
 		}
 
-		fclose(input);   // Закрываем входной файл
-		fclose(output);  // Закрываем выходной файл
+		// Завершаем строку нуль-терминатором
+		result[r] = '\0';
 
-		printf("\n»> Результат сохранён в output.txt\n");
+		// Выводим результат на экран и записываем в файл
+		printf("%s", result);
+		fprintf(output, "%s", result);
 	}
+
+	fclose(input);   
+	fclose(output);  
+
+	printf("\n»> Результат сохранён в output.txt\n");
+}
 
 
 
 int main() {
 	SetConsoleOutputCP(CP_UTF8);
 	SetConsoleCP(CP_UTF8);
-	
+
 	int hours_to_work = 0;
 	int predmet = 0;
 	int slot = 0;
 	int item_to_drop = 0;
 	int target_id = 0;
-	
+
 
 	load_items("items.txt");
 
@@ -306,7 +373,7 @@ int main() {
 
 	while (1) {
 		printf("\n === МЕНЮ ФЕРМЕРА ===\n");
-			printf("Привет, %s! \n ", farmer_name);
+		printf("Привет, %s! \n ", farmer_name);
 		printf("[0] Выход\n"
 			"[1] Посмотреть на часы\n"
 			"[2] Промотать время(поработать)\n"
@@ -324,90 +391,45 @@ int main() {
 			printf("Выход из игры.До скорой встречи!\n");
 			return 0;
 		case 1:
-			printf("Текущее время: День %d , %02d:00\n", current_day, current_hour);
+			show_time(current_day, current_hour);
 			break;
 		case 2:
-			hours_to_work = safe_input_int("Сколько часов вы хотите поработать?");
-
-			if (hours_to_work < 0) {
-				printf("Ошибка:Количество часов не может быть отрицательным!\n");
-				break;
-			}
-
-			current_hour += hours_to_work;
-			while (current_hour >= 24) {
-				current_hour -= 24;
-				current_day++;
-			}
-			printf("Вы успешно поработали! Текущее время : День %d,%02d:00\n", current_day, current_hour);
+			skip_time(&current_day, &current_hour);
 			break;
-
+			
 		case 3:
-			print_inventory();
+			show_inventory(inventory, item_names);
 			break;
 
 		case 4:
-			printf("Введите номер предмета:\n");
-			scanf_s("%d", &predmet);
-			printf("Введите номер слота:\n");
-			scanf_s("%d", &slot);
-			if (predmet && slot >= 0 && predmet && slot < 10) {
-				inventory[slot] = predmet;
-			}
+			put_item(inventory);
+			break;
 
-			else {
-				printf("Введите число от 1 до 9!\n");
-			}
 		case 5:
-			item_to_drop = safe_input_int("Введите id предмета:\n");
-
-			if (item_to_drop <= 0 || item_to_drop >= Inventory_size) {
-				printf("Ошибка!Такого слота не существует!Введите от 1 до %d.\n", Inventory_size - 1);
-				break;
-			}
-			inventory[item_to_drop] = "empty_item";
-			printf("Слот %d очищен.\n", item_to_drop);
+			discard_item(inventory);
 			break;
 
 		case 6:
-			target_id = safe_input_int("Введите id предмета для отчистки:");
-			if (target_id <= 0 || target_id >= Inventory_size) {
-				printf("Ошибка!Неверный  id предмета.\n");
-				break;
-			}
-			int clean_count = 0;
-
-			for (int i = 0; i < Inventory_size; i++) {
-				if (inventory[i] == target_id) {
-					inventory[i] = "empty_item";
-					clean_count++;
-				}
-			}
-			if (clean_count > 0) {
-				printf("Очищено слотов: %d\n", clean_count);
-			}
-			else {
-				printf("Предмет с тким id не найден в инвентаре.\n");
-			}
+			clean_trash(inventory);
 			break;
-		
+
 		case 7:
-			search_item_by_name();
+			search_item_by_name(inventory,item_names);
 			break;
 
 		case 8:
-			write_diary();
+			write_diary(farmer_name, current_day, current_hour, inventory);
 			break;
 
 		case 9:
-			process_letter();
+			process_letter(current_day, inventory);
 			break;
 
 		default:
-			printf("»> Такого пункта нет. Попробуйте снова.\n");
+			printf(" Такого пункта нет. Попробуйте снова.\n");
 			break;
 		}
-		
+
 
 	}
 	return 0;
