@@ -86,7 +86,7 @@ void load_items(const char* filename) {
 	}
 
 	fclose(file);
-	printf("»> Названия предметов загружены из %s\n", filename);
+	printf(" Названия предметов загружены из %s\n", filename);
 }
 
 // ФУНКЦИЯ ВЫВОДА ИНВЕНТАРЯ
@@ -107,7 +107,7 @@ void show_time(int day, int hour) {
 void skip_time(int* day, int* hour) {
 	int hours = safe_input_int("Сколько часов вы хотите поработать? ");
 	if (hours < 0) {
-		printf("»> Ошибка: количество часов не может быть отрицательным!\n");
+		printf(" Ошибка: количество часов не может быть отрицательным!\n");
 		return;
 	}
 	*hour += hours;
@@ -139,7 +139,7 @@ void put_item(int inv[]) {
 void discard_item(int inv[]) {
 	int index = safe_input_int("Введите индекс слота для очистки (0-9): ");
 	if (index < 0 || index >= Inventory_size) {
-		printf("»> Ошибка: Индекс должен быть от 0 до %d.\n", Inventory_size - 1);
+		printf(" Ошибка: Индекс должен быть от 0 до %d.\n", Inventory_size - 1);
 		return;
 	}
 	inv[index] = EMPTY_ITEM;
@@ -149,7 +149,7 @@ void discard_item(int inv[]) {
 void clean_trash(int inv[]) {
 	int target_id = safe_input_int("Введите ID предмета для очистки: ");
 	if (target_id == EMPTY_ITEM) {
-		printf("»> Ошибка: Нельзя очищать пустые слоты!\n");
+		printf(" Ошибка: Нельзя очищать пустые слоты!\n");
 		return;
 	}
 	int clean_count = 0;
@@ -169,7 +169,8 @@ void clean_trash(int inv[]) {
 
 // ФУНКЦИЯ ПОИСКА ПРЕДМЕТА ПО НАЗВАНИЮ(Пункт 7)
 void search_item_by_name() {
-	char search_name[MAX_NAME_LEN];  // Сюда запишем название для поиска
+	char search_name[MAX_NAME_LEN];// Сюда запишем название для поиска
+	getchar();
 
 
 	safe_input_string("Введите название предмета: ", search_name, MAX_NAME_LEN);
@@ -186,7 +187,7 @@ void search_item_by_name() {
 
 	// Если не нашли название в каталоге
 	if (target_id == -1) {
-		printf("»> Предмет с названием '%s' не найден в каталоге.\n", search_name);
+		printf("Предмет с названием '%s' не найден в каталоге.\n", search_name);
 		return;
 	}
 
@@ -236,7 +237,7 @@ void write_diary() {
 	fprintf(file, "========================\n\n");
 
 	fclose(file);  // Закрываем файл
-	printf("»> Состояние записано в diary.txt!\n");
+	printf(" Состояние записано в diary.txt!\n");
 }
 //ШАБЛОНИЗАТОР ДИАЛОГОВ
 
@@ -244,14 +245,14 @@ void process_letter() {
 	// Открываем input.txt для чтения
 	FILE* input = fopen("input.txt", "r");
 	if (input == NULL) {
-		printf("»> Ошибка: не удалось открыть input.txt\n");
+		printf(" Ошибка: не удалось открыть input.txt\n");
 		return;
 	}
 
 	// Открываем output.txt для записи 
 	FILE* output = fopen("output.txt", "w");
 	if (output == NULL) {
-		printf("»> Ошибка: не удалось создать output.txt\n");
+		printf(" Ошибка: не удалось создать output.txt\n");
 		fclose(input);
 		return;
 	}
@@ -339,7 +340,7 @@ void process_letter() {
 	fclose(input);   
 	fclose(output);  
 
-	printf("\n»> Результат сохранён в output.txt\n");
+	printf("\n Результат сохранён в output.txt\n");
 }
 
 
