@@ -342,7 +342,64 @@ void process_letter() {
 
 	printf("\n Результат сохранён в output.txt\n");
 }
+//лаба 4
 
+// Функция для освобождения памяти (чтобы не было утечек)
+void free_map(char** map, int height) {
+	if (map == NULL) return;
+	for (int i = 0; i < height; i++) {
+		free(map[i]); // освобождаем каждую строку
+	}
+	free(map); // освобождаем сам массив указателей
+}
+
+// генерация нового этажа
+char** generate_dungeon(int* height, int* width, int* hero_x, int* hero_y, int* stairs_down_x, int* stairs_down_y, int* stairs_up_x, int* stairs_up_y) {
+	// случайный размер от 10 до 20 (чтобы влезло в экран)
+	*height = rand() % 11 + 10;
+	(*width) = rand() % 11 + 10;
+
+	// выделяем память под карту (указатель на указатель)
+	char** map = (char**)malloc(*height * sizeof(char*));
+	for (int i = 0; i < *height; i++) {
+		map[i] = (char*)malloc((*width) * sizeof(char));
+	}
+
+	// заполняем карту
+	for (int y = 0; y < *height; y++) {
+		for (int x = 0; x < (*width); x++) {
+			// Границы - стены
+			if (y == 0 || y == *height - 1 || x == 0 || x == (*width) - 1) {
+				map[y][x] = '#';
+			}
+			else {
+				int r = rand() % 100;
+				if (r < 10) map[y][x] = 'T';       // 10% деревья
+				else if (r < 20) map[y][x] = 'R';  // 10% камни
+				else if (r < 30) map[y][x] = '~';  // 10% лед
+				else map[y][x] = '.';              //  пол
+			}
+		}
+	}
+
+	// Ставим героя в случайное пустое место (не на границе)
+	*hero_x = rand() % ((*width) - 2) + 1;
+	*hero_y = rand() % (*height - 2) + 1;
+
+	// лестница вверх (выход) появляется прямо под героем
+	*stairs_up_x = *hero_x;
+	*stairs_up_y = *hero_y;
+	map[*hero_y][*hero_x] = 'U'; // Сначала ставим лестницу
+
+	// ставим лестницу вниз (D) в другое случайное место
+	do {
+		*stairs_down_x = rand() % ((*width) - 2) + 1;
+		*stairs_down_y = rand() % (*height - 2) + 1;
+	} while (*stairs_down_x == *hero_x && *stairs_down_y == *hero_y);
+	map[*stairs_down_y][*stairs_down_x] = 'D';
+
+	return map; // Возвращаем готовую карту
+}
 
 
 int main() {
@@ -367,10 +424,6 @@ int main() {
 
 	int choice = -1;
 
-	// Если имя пустое - ставим "Фермер"
-	if (strlen(farmer_name) == 0) {
-		strcpy(farmer_name, "Фермер");
-	}
 
 	while (1) {
 		printf("\n === МЕНЮ ФЕРМЕРА ===\n");
