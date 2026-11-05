@@ -355,7 +355,7 @@ void free_map(char** map, int height) {
 
 // генерация нового этажа
 char** generate_dungeon(int* height, int* width, int* hero_x, int* hero_y, int* stairs_down_x, int* stairs_down_y, int* stairs_up_x, int* stairs_up_y) {
-	// случайный размер от 10 до 20 (чтобы влезло в экран)
+	// Случайный размер от 10 до 20 (чтобы влезло в экран)
 	*height = rand() % 11 + 10;
 	(*width) = rand() % 11 + 10;
 
@@ -382,7 +382,7 @@ char** generate_dungeon(int* height, int* width, int* hero_x, int* hero_y, int* 
 		}
 	}
 
-	// Ставим героя в случайное пустое место (не на границе)
+	// ставим героя в случайное пустое место (не на границе)
 	*hero_x = rand() % ((*width) - 2) + 1;
 	*hero_y = rand() % (*height - 2) + 1;
 
@@ -398,9 +398,20 @@ char** generate_dungeon(int* height, int* width, int* hero_x, int* hero_y, int* 
 	} while (*stairs_down_x == *hero_x && *stairs_down_y == *hero_y);
 	map[*stairs_down_y][*stairs_down_x] = 'D';
 
-	return map; // Возвращаем готовую карту
+	return map; // возвращаем готовую карту
 }
-
+// отрисовка карты на экране
+void print_map(char** map, int height, int width, int depth) {
+	system("cls"); // Очищаем экран (для Windows)
+	printf("=== ПОДЗЕМЕЛЬЕ. Глубина: %d ===\n", depth);
+	printf("Управление: W (вверх), A (влево),S(вниз), D(вправо), Q(выход домой с лестницы U)\n\n");
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				printf("%c ", map[y][x]);
+			}
+			printf("\n");
+		}
+}
 
 int main() {
 	SetConsoleOutputCP(CP_UTF8);
@@ -412,7 +423,7 @@ int main() {
 	int item_to_drop = 0;
 	int target_id = 0;
 
-
+	srand(time(NULL)); // инициализация случайных чисел (для карты)
 	load_items("items.txt");
 
 	printf("Введите имя фермера: ");
@@ -424,6 +435,10 @@ int main() {
 
 	int choice = -1;
 
+	// Если имя пустое - ставим "Фермер"
+	if (strlen(farmer_name) == 0) {
+		strcpy(farmer_name, "Фермер");
+	}
 
 	while (1) {
 		printf("\n === МЕНЮ ФЕРМЕРА ===\n");
