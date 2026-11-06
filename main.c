@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <string.h>
+#include <time.h>    // для rand() и srand()
+#include <conio.h>   // для _getch() (движение без Enter)
 #define Inventory_size 10
 #define MAX_ITEMS  10
 #define MAX_NAME_LEN 32
@@ -411,6 +413,79 @@ void print_map(char** map, int height, int width, int depth) {
 			}
 			printf("\n");
 		}
+}
+
+// проверка: нельзя ли встать на клетку (x, y)
+// возвращает 1, если клетка закрыта (стена, дерево, камень или за краем карты)
+int is_blocked(char** map, int height, int width, int x, int y) {
+	// сначала проверяем границы, иначе обратимся к памяти за пределами карты
+	if (x < 0 || x >= width || y < 0 || y >= height) return 1;
+	if (map[y][x] == '#' || map[y][x] == 'T' || map[y][x] == 'R') return 1;
+	return 0;
+}
+
+void start_adventure() {
+	int height, width;
+	int hero_x, hero_y;
+	int stairs_down_x, stairs_down_y;
+	int stairs_up_x, stairs_up_y;
+	int depth = 1;
+
+	char** map = generate_dungeon(&height, &width, &hero_x, &hero_y,
+		&stairs_down_x, &stairs_down_y,
+		&stairs_up_x, &stairs_up_y);
+
+	// Запоминаем, что лежит под героем, и ставим героя на карту
+	char under = map[hero_y][hero_x];
+	map[hero_y][hero_x] = '@';
+
+	int game_over = 0;
+
+	while (!game_over) {
+		print_map(map, height, width, depth);
+
+		char key = _getch();
+		if (key >= 'a' && key <= 'z') key -= 32;
+
+		if (key == 'Q') {
+			if (under == 'U') {   // выйти можно, только стоя на лестнице вверх
+				printf("\n Вы благополучно выбрались из подземелья!\n");
+				system("pause");
+				game_over = 1;
+			}
+			else {
+				printf("\n Вы не на лестнице вверх! Нельзя выйти.\n");
+				_getch();
+			}
+			continue;
+		}
+
+		int new_x = hero_x;
+		int new_y = hero_y;
+		int dx = 0, dy = 0;
+
+		if (key == 'W') { new_y--; dy = -1; }
+		else if (key == 'S') { new_y++; dy = 1; }
+		else if (key == 'A') { new_x--; dx = -1; }
+		else if (key == 'D') { new_x++; dx = 1; }
+		else continue;
+
+		// если идти некуда, просто ждём следующую клавишу
+		if (is_blocked(map, height, width, new_x, new_y)) continue;
+
+		// возвращаем на старое место то, что там было
+		map[hero_y][hero_x] = under;
+
+		// Переходим на новую клетку
+		hero_x = new_x;
+		hero_y = new_y;
+
+		// запоминаем, что на новой клетке, и ставим туда героя
+		under = map[hero_y][hero_x];
+		map[hero_y][hero_x] = '@';
+	}
+
+	free_map(map, height);
 }
 
 int main() {
