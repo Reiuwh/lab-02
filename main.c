@@ -480,8 +480,42 @@ void start_adventure() {
 		hero_x = new_x;
 		hero_y = new_y;
 
+
+		// Если встали на лёд, скользим в том же направлении
+		while (map[hero_y][hero_x] == '~') {
+			int next_x = hero_x + dx;
+			int next_y = hero_y + dy;
+
+			// Впереди препятствие: останавливаемся на льду
+			if (is_blocked(map, height, width, next_x, next_y)) break;
+
+			// Иначе делаем ещё один шаг
+			hero_x = next_x;
+			hero_y = next_y;
+		}
+
 		// запоминаем, что на новой клетке, и ставим туда героя
 		under = map[hero_y][hero_x];
+		map[hero_y][hero_x] = '@';
+
+		// Дошли до лестницы вниз: строим новый этаж
+		if (under == 'D') {
+			free_map(map, height);   // старую карту больше не нужно хранить
+			depth++;
+
+			map = generate_dungeon(&height, &width, &hero_x, &hero_y,
+				&stairs_down_x, &stairs_down_y,
+				&stairs_up_x, &stairs_up_y);
+
+			// Снова запоминаем, что под героем на новом этаже, и ставим его
+			under = map[hero_y][hero_x];
+			map[hero_y][hero_x] = '@';
+
+			printf("\n Вы спустились на глубину %d!\n", depth);
+			_getch();
+			continue;
+		}
+
 		map[hero_y][hero_x] = '@';
 	}
 
@@ -527,7 +561,8 @@ int main() {
 			"[6] Отчистка от мусора\n"
 			"[7] Поиск предмета по названию\n"
 			"[8] Записать состояние в дневник\n"
-			"[9] Обработать письмо NPC\n");
+			"[9] Обработать письмо NPC\n"
+			"[10] Отправиться в приключение (Подземелье)\n"); // новый пункт
 
 		choice = safe_input_int("Выберите пункт:");
 		switch (choice) {
@@ -567,6 +602,9 @@ int main() {
 
 		case 9:
 			process_letter(current_day, inventory);
+			break;
+
+		case 10: start_adventure(); 
 			break;
 
 		default:
