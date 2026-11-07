@@ -9,6 +9,8 @@
 #define MAX_ITEMS  10
 #define MAX_NAME_LEN 32
 #define EMPTY_ITEM 0
+#define MIN_MAP_SIZE 5
+#define MAX_MAP_SIZE 30
 
 char item_names[MAX_ITEMS][MAX_NAME_LEN]; //ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
 char farmer_name[MAX_NAME_LEN];
@@ -357,14 +359,14 @@ void free_map(char** map, int height) {
 
 // генерация нового этажа
 char** generate_dungeon(int* height, int* width, int* hero_x, int* hero_y, int* stairs_down_x, int* stairs_down_y, int* stairs_up_x, int* stairs_up_y) {
-	// Случайный размер от 10 до 20 (чтобы влезло в экран)
-	*height = rand() % 11 + 10;
-	(*width) = rand() % 11 + 10;
+	// Случайный размер от 5 до 30 
+	*height = rand() % (MAX_MAP_SIZE - MIN_MAP_SIZE + 1) + MIN_MAP_SIZE ;
+	(*width) = rand() % (MAX_MAP_SIZE - MIN_MAP_SIZE + 1) + MIN_MAP_SIZE;
 
 	// выделяем память под карту (указатель на указатель)
-	char** map = (char**)malloc(*height * sizeof(char*));
+	char** map = (char**)malloc(*height * sizeof(char*));//выделяет место под список адресов строк
 	for (int i = 0; i < *height; i++) {
-		map[i] = (char*)malloc((*width) * sizeof(char));
+		map[i] = (char*)malloc((*width) * sizeof(char)); //выделяет место под каждую строку
 	}
 
 	// заполняем карту
@@ -445,7 +447,7 @@ void start_adventure() {
 		print_map(map, height, width, depth);
 
 		char key = _getch();
-		if (key >= 'a' && key <= 'z') key -= 32;
+		if (key >= 'a' && key <= 'z') key -= 32; //превращает маленькую букву в большую (разница в таблице символов 32), чтобы работали и w, и W
 
 		if (key == 'Q') {
 			if (under == 'U') {   // выйти можно, только стоя на лестнице вверх
@@ -507,7 +509,7 @@ void start_adventure() {
 				&stairs_down_x, &stairs_down_y,
 				&stairs_up_x, &stairs_up_y);
 
-			// Снова запоминаем, что под героем на новом этаже, и ставим его
+			// cнова запоминаем, что под героем на новом этаже, и ставим его
 			under = map[hero_y][hero_x];
 			map[hero_y][hero_x] = '@';
 
