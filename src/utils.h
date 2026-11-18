@@ -21,4 +21,5 @@ void skip_time(int* day, int* hour);
 void write_diary();
 void process_letter();
 
+
 #endif

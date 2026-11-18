@@ -6,17 +6,25 @@
 #define MAX_MAP_SIZE 30
 
 
-void free_map(char** map, int height);
-char** generate_dungeon(int* height, int* width, int* hero_x, int* hero_y, int* stairs_down_x, int* stairs_down_y, int* stairs_up_x, int* stairs_up_y);
-void print_map(char** map, int height, int width, int depth);
-int is_blocked(char** map, int height, int width, int x, int y);
-void start_adventure();
+void free_map(struct Map* map);
+struct Map* generate_dungeon(int depth);
+void print_map(struct Map* map);
+int is_blocked(struct Map* map, int x, int y);
+void start_adventure(struct Player* player);
+
+enum Biome {
+	BIOME_FOREST = 0,
+	BIOME_SWAMP,
+	BIOME_RUINS,
+	BIOME_CRYSTAL
+};
 
 struct Map {
 	char** field;
 	int width;
 	int height;
 	int depth;
+	enum Biome biome;
 
 	int hero_x;
 	int hero_y;

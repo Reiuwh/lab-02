@@ -13,7 +13,7 @@ void put_item(int inv[]);
 void discard_item(int inv[]);
 void search_item_by_name();
 void clean_trash(int inv[]);
-void destroy_player(player);
+void destroy_player(struct Player* player);
 
 struct Player {
 	char farmer_name[MAX_NAME_LEN];

@@ -11,7 +11,7 @@
 
 
  //ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
-char name[MAX_NAME_LEN];
+char farmer_name[MAX_NAME_LEN];
 char item_names[MAX_ITEMS][MAX_NAME_LEN];
 int inventory[Inventory_size] = { 0,1,2,3,0,1,0,1,0,0 };
 int current_day = 1;
@@ -30,22 +30,10 @@ int main() {
 	int target_id = 0;
 
 	srand(time(NULL)); // инициализация случайных чисел (для карты)
-	load_items("items.txt");
+	load_items("items.txt",item_names);
 
-	/*struct Player* player = NULL;
+	struct Player* player = recreate_player(NULL);
 
-	if (player!= NULL) {
-		printf("Введите имя фермера: ");
-		safe_input_string("", player->farmer_name, MAX_NAME_LEN);
-		// Если имя пустое - ставим "Фермер"
-		if (strlen(farmer_name) == 0) {
-			strcpy(farmer_name, "Фермер");
-		}
-	}
-	if (strlen(farmer_name) == 0) {
-		strcpy(farmer_name, "Фермер");
-	}
-	*/
 	int choice = -1;
 	while (1) {
 		printf("\n === МЕНЮ ФЕРМЕРА ===\n");
@@ -66,6 +54,7 @@ int main() {
 		switch (choice) {
 		case 0:
 			printf("Выход из игры.До скорой встречи!\n");
+			destroy_player(player);
 			return 0;
 		case 1:
 			show_time(current_day, current_hour);
@@ -91,18 +80,18 @@ int main() {
 			break;
 
 		case 7:
-			search_item_by_name(inventory,item_names);
+			search_item_by_name();
 			break;
 
 		case 8:
-			write_diary(farmer_name, current_day, current_hour, inventory);
+			write_diary();
 			break;
 
 		case 9:
-			process_letter(current_day, inventory);
+			process_letter();
 			break;
 
-		case 10: start_adventure(); 
+		case 10: start_adventure(player); 
 			break;
 
 		default:
