@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "utils.h"
+#include"player.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -27,6 +28,8 @@ int safe_input_int(const char* prompt) {
 			clear_input();
 		}
 	} while (result != 1);
+
+	clear_input();
 	return value;
 }
 
@@ -105,7 +108,7 @@ void skip_time(int* day, int* hour) {
 	printf("Вы поработали! Теперь: День %d, %02d:00\n", *day, *hour);
 }
 
-void write_diary() {
+void write_diary(struct GameState* game) {
 
 	FILE* file = fopen("diary.txt", "a");
 
@@ -116,8 +119,8 @@ void write_diary() {
 
 	// Записываем сводку в файл
 	fprintf(file, "=== Запись в дневнике ===\n");
-	fprintf(file, "Фермер: %s\n", farmer_name);
-	fprintf(file, "День %d, время: %02d:00\n", current_day, current_hour);
+	fprintf(file, "Фермер: %s\n", game->player->farmer_name);
+	fprintf(file, "День %d, время: %02d:00\n", game->current_day, game->current_hour);
 	fprintf(file, "Инвентарь:\n");
 
 	// Записываем только непустые слоты
@@ -125,8 +128,8 @@ void write_diary() {
 
 
 		i < Inventory_size; i++) {
-		if (inventory[i] != 0) {  // 0 - это пустой слот
-			fprintf(file, "  Слот %d: %s\n", i, item_names[inventory[i]]);
+		if (game->player->inventory[i] != 0) {  // 0 - это пустой слот
+			fprintf(file, "  Слот %d: %s\n", i, game->item_names[game->player->inventory[i]]);
 		}
 	}
 
@@ -137,7 +140,7 @@ void write_diary() {
 }
 //ШАБЛОНИЗАТОР ДИАЛОГОВ
 
-void process_letter() {
+void process_letter(struct GameState* game) {
 	// Открываем input.txt для чтения
 	FILE* input = fopen("input.txt", "r");
 	if (input == NULL) {
@@ -175,8 +178,8 @@ void process_letter() {
 					line[i + 3] == 'M' && line[i + 4] == 'E' &&
 					line[i + 5] == '>') {
 					// Это тег <NAME>. Копируем имя фермера в результат.
-					for (int j = 0; farmer_name[j] != '\0'; j++) {
-						result[r] = farmer_name[j];
+					for (int j = 0; game->player->farmer_name[j] != '\0'; j++) {
+						result[r] = game->player->farmer_name[j];
 						r++;
 					}
 					i = i + 5;  // Пропускаем 6 символов тега (цикл ещё +1)
@@ -189,7 +192,7 @@ void process_letter() {
 					line[i + 3] == 'Y' && line[i + 4] == '>') {
 					// Преобразуем число current_day в строку
 					char day_str[10];
-					sprintf(day_str, "%d", current_day);
+					sprintf(day_str, "%d", game->current_day);
 
 					// Копируем строку с днём в результат
 					for (int j = 0; day_str[j] != '\0'; j++) {
@@ -205,7 +208,7 @@ void process_letter() {
 					line[i + 3] == 'E' && line[i + 4] == 'M' &&
 					line[i + 5] == '>') {
 					// Берём название предмета из нулевого слота
-					char* item_str = item_names[inventory[0]];
+					char* item_str = game->item_names[game->player->inventory[0]];
 
 					// Копируем его в результат
 					for (int j = 0; item_str[j] != '\0'; j++) {

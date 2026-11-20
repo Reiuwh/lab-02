@@ -7,16 +7,17 @@
 #include <windows.h>
 #include <time.h>  
 #include <conio.h> 
-// ФУНКЦИЯ ВЫВОДА ИНВЕНТАРЯ
-void print_inventory() {
-	printf("--- Содержимое рюкзака ---\n");
 
-	// Проходим по всем 10 слотам
-	for (int i = 0; i < Inventory_size; i++) {
-		// inventory[i] - это ID предмета в слоте i
-		// item_names[ID] - это название предмета с таким ID
-		printf("Слот %d: [%d] - %s\n", i, inventory[i], item_names[inventory[i]]);
+void sell_maps(struct GameState* game) {
+	if (game->player->map_drawn == 0) {
+		printf("\n У вас нет карт для продажи.\n");
+		return;
 	}
+	int total_gold = game->player->map_drawn * 50;
+	game->player->gold += total_gold;
+	printf("\n Вы продали %d карт и получили %d золото!\n", game->player->map_drawn, total_gold);
+	game->player->map_drawn = 0;
+
 }
 void show_inventory(int inv[], char names[][MAX_NAME_LEN]) {
 	printf("--- Содержимое рюкзака ---\n");
@@ -157,4 +158,20 @@ void destroy_player(struct Player* player){
 	printf("Память структуры по адресу %p отчищена \n" , (void*)player);
 	free(player);
 	player = NULL; //обнуляем указатель чтоб избежать исп освобожд памяти в будущем
+}
+
+//функция карточки персонажа
+void show_player_card(struct Player* player) {
+	if (player == NULL) {
+		printf("\n\n");
+		return;
+	}
+	printf("\n === КАРТОЧКА ПЕРСОНАЖА ===\n");
+	printf("Имя: %s\n", player->farmer_name);
+	printf("HP: %d/%d\n", player->hp, player->max_hp);
+	printf("Выносливость: %d\%d\n", player->stamina, player->max_stamina);
+	printf("Золото: %d\n", player->gold);
+	printf("Нарисовано карт: %d\n", player->map_drawn);
+	printf("=======================================\n");
+
 }

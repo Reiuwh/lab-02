@@ -10,37 +10,37 @@
 
 
 
- //ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
-char farmer_name[MAX_NAME_LEN];
-char item_names[MAX_ITEMS][MAX_NAME_LEN];
-int inventory[Inventory_size] = { 0,1,2,3,0,1,0,1,0,0 };
-int current_day = 1;
-int current_hour = 8;
-
-
 
 int main() {
 	SetConsoleOutputCP(CP_UTF8);
 	SetConsoleCP(CP_UTF8);
 
-	int hours_to_work = 0;
-	int predmet = 0;
-	int slot = 0;
-	int item_to_drop = 0;
-	int target_id = 0;
-
+	struct GameState game;
+	game.player = NULL;
+	game.current_day = 1;
+	game.current_hour = 8;
+	
 	srand(time(NULL)); // инициализация случайных чисел (для карты)
-	load_items("items.txt",item_names);
+	load_items("items.txt",game.item_names);
 
-	struct Player* player = recreate_player(NULL);
+
+
+
 
 	int choice = -1;
 	while (1) {
 		printf("\n === МЕНЮ ФЕРМЕРА ===\n");
-		printf("Привет, %s! \n ", player->farmer_name);
+
+		if (game.player != NULL) {
+			printf("Привет, %s! \n ", game.player->farmer_name);
+		}
+		else {
+			printf("Привет, путешественник!(персонаж пока не слздан)\n");
+		}
+		
 		printf("[0] Выход\n"
-			"[1] Посмотреть на часы\n"
-			"[2] Промотать время(поработать)\n"
+			"[1] Создать /пересоздать персонажа\n"
+			"[2] Карточка персонажа\n"
 			"[3] Посмотреть инвентарь\n"
 			"[4] Положить предмет в слот\n"
 			"[5] Выбросить предмет\n"
@@ -48,58 +48,65 @@ int main() {
 			"[7] Поиск предмета по названию\n"
 			"[8] Записать состояние в дневник\n"
 			"[9] Обработать письмо NPC\n"
-			"[10] Отправиться в приключение (Подземелье)\n"); // новый пункт
+			"[10] Отправиться в приключение (Подземелье)\n"
+			"[11] Продать карты\n"// новый пункт
+			"[12] Посмотреть на часы\n"
+			"[13] Пропустить время\n"
+			"[14] Лечь спать(отдых)\n");
 
 		choice = safe_input_int("Выберите пункт:");
 		switch (choice) {
 		case 0:
 			printf("Выход из игры.До скорой встречи!\n");
-			destroy_player(player);
+			destroy_player(game.player);
 			return 0;
 		case 1:
-			show_time(current_day, current_hour);
+			game.player = recreate_player(game.player);
 			break;
 		case 2:
-			skip_time(&current_day, &current_hour);
+			show_player_card(game.player);
 			break;
 			
 		case 3:
-			show_inventory(inventory, item_names);
+			show_inventory(game.player->inventory, game.item_names);
 			break;
 
 		case 4:
-			put_item(inventory);
+			put_item(game.player->inventory);
 			break;
 
 		case 5:
-			discard_item(inventory);
+			discard_item(game.player->inventory);
 			break;
 
 		case 6:
-			clean_trash(inventory);
+			clean_trash(game.player->inventory);
 			break;
 
 		case 7:
-			search_item_by_name();
+			search_item_by_name(game.player, game.item_names);
 			break;
 
 		case 8:
-			write_diary();
+			write_diary(&game);
 			break;
 
 		case 9:
-			process_letter();
+			process_letter(&game);
 			break;
 
-		case 10: start_adventure(player); 
+		case 10: start_adventure(&game); 
+			break;
+
+		case 11:
+			sell_maps(&game);
 			break;
 
 		default:
 			printf(" Такого пункта нет. Попробуйте снова.\n");
 			break;
 		}
-
-
+	
 	}
 	return 0;
 }

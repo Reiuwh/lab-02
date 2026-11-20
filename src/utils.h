@@ -6,11 +6,12 @@
 #define MAX_NAME_LEN 32
 #define EMPTY_ITEM 0
 
-extern char farmer_name[MAX_NAME_LEN];
-extern char item_names[MAX_ITEMS][MAX_NAME_LEN];
-extern int inventory[Inventory_size];
-extern int current_day;
-extern int current_hour;
+struct GameState {
+	struct Player* player;
+	int current_day;
+	int current_hour;
+	char item_names[MAX_ITEMS][MAX_NAME_LEN];
+};
 
 
 void clear_input();
@@ -19,8 +20,8 @@ void safe_input_string(const char* prompt, char* buffer, int max_len);
 void load_items(const char* filename, char item_names[MAX_ITEMS][MAX_NAME_LEN]);
 void show_time(int day, int hour);
 void skip_time(int* day, int* hour);
-void write_diary();
-void process_letter();
+void write_diary(struct GameState* game);
+void process_letter(struct GameState* game);
 
 
 #endif

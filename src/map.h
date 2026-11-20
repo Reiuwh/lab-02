@@ -8,9 +8,9 @@
 
 void free_map(struct Map* map);
 struct Map* generate_dungeon(int depth);
-void print_map(struct Map* map, struct Player* player);
+void print_map(struct Map* map, struct GameState* game);
 int is_blocked(struct Map* map, int x, int y);
-void start_adventure(struct Player* player);
+void start_adventure(struct GameState* game);
 
 enum Biome {
 	BIOME_FOREST = 0,

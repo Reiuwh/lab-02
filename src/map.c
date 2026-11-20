@@ -71,12 +71,12 @@ struct Map* generate_dungeon(int depth) {
 	return map; // возвращаем готовую карту
 }
 // отрисовка карты на экране
-void print_map(struct Map* map, struct Player* player) {
+void print_map(struct Map* map, struct GameState* game) {
 	system("cls"); // Очищаем экран чтоб карта рисовалась поверх предыдущей
 
-	if (player!= NULL) {
+	if (game->player!= NULL) {
 		printf("HP: %d/%d | Выносливость: %d/%d | Золот: %d | Время: %02d:00\n",
-			player->hp, player->max_hp, player->stamina, player->max_stamina, player->gold, current_hour);
+			game->player->hp, game->player->max_hp, game->player->stamina, game->player->max_stamina, game->player->gold, game->current_hour);
 	}
 	printf("=== ПОДЗЕМЕЛЬЕ. Глубина: %d ===\n", map->depth);
 	if (map->biome == BIOME_FOREST) printf("Биом: Редколесье\n");
@@ -103,8 +103,8 @@ int is_blocked(struct Map* map, int x, int y) {
 	return 0;
 }
 
-void start_adventure(struct Player* player) {
-	if (player == NULL) return;
+void start_adventure(struct GameState* game) {
+	if (game->player == NULL) return;
 
 	int depth = 1;
 
@@ -117,7 +117,7 @@ void start_adventure(struct Player* player) {
 	int is_mapped = 0;//нарисована ли карта на этом этаже
 
 	while (!game_over) {
-		print_map(map,player);
+		print_map(map,game);
 
 		char key = _getch();
 		if (key >= 'a' && key <= 'z') key -= 32; //превращает маленькую букву в большую (разница в таблице символов 32), чтобы работали и w, и W
@@ -126,14 +126,14 @@ void start_adventure(struct Player* player) {
 			if (is_mapped) {
 				printf("\n Вы уже зарисовали карту этого этажа!(нажмите любую клавишу)\n");
 			}
-			else if (player->stamina < 5) {
+			else if (game->player->stamina < 5) {
 				printf("\n Не хватает выносливости!Нужно 5!!(нажмите любую клавишу)\n");
 			}
 			else {
-				player->stamina -= 5;
-				player->map_drawn++;
+				game->player->stamina -= 5;
+				game->player->map_drawn++;
 				is_mapped = 1;
-				printf("\n Вы потратили 5 стамины и зарисовали карту!(Всего карт: %d)(нажмите любую клавишу)\n", player->map_drawn);
+				printf("\n Вы потратили 5 стамины и зарисовали карту!(Всего карт: %d)(нажмите любую клавишу)\n", game->player->map_drawn);
 			}
 			_getch();
 			continue;
@@ -169,7 +169,7 @@ void start_adventure(struct Player* player) {
 		if (map->biome == BIOME_SWAMP) {
 			stamina_cost = 2; // в топи шаг -2
 		}
-		player->stamina -= stamina_cost;
+		game->player->stamina -= stamina_cost;
 
 
 		// возвращаем на старое место то, что там было
@@ -199,13 +199,13 @@ void start_adventure(struct Player* player) {
 
 		// Дошли до лестницы вниз: строим новый этаж
 		if (under == 'D') {
-			player->stamina -= 5;
-			current_hour++;
-			if (current_hour >= 24) { current_hour = 0;current_day++; }
+			game->player->stamina -= 5;
+			game->current_hour++;
+			if (game->current_hour >= 24) { game->current_hour = 0;game->current_day++; }
 
 			int reward = 10 * map->depth;
 			if (map->biome == BIOME_CRYSTAL) reward *= 3;
-			player->gold += reward;
+			game->player->gold += reward;
 
 			printf("\n Вы спустились на глубину %d!Получено %d золота. (нажмите клавишу)\n", map->depth + 1,reward);
 
@@ -221,13 +221,13 @@ void start_adventure(struct Player* player) {
 			_getch();
 			continue;
 		}
-		if (player->stamina <= 0 || current_hour == 2) {
+		if (game->player->stamina <= 0 || game->current_hour == 2) {
 			printf("\n========================================================\n");
 			printf("Вы упали без сил! Спасательная служба доставила вас домой.\n");
 			printf("За услуги списана половина заработанного золота.\n");
 			printf("==========================================================\n");
-			player->gold /= 2;
-			player->stamina = 0;
+			game->player->gold /= 2;
+			game->player->stamina = 0;
 			game_over = 1;
 			_getch();
 		}
