@@ -14,6 +14,7 @@ void discard_item(int inv[]);
 void search_item_by_name();
 void clean_trash(int inv[]);
 void destroy_player(struct Player* player);
+void show_player_card(struct Player* player);
 
 struct Player {
 	char farmer_name[MAX_NAME_LEN];
@@ -25,6 +26,7 @@ struct Player {
 	int x, y;
 	int inventory[Inventory_size];
 	int map_count;
+	int map_drawn;
 };
 
 struct Player* create_player(const char* name);

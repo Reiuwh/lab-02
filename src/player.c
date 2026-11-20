@@ -68,7 +68,7 @@ void clean_trash(int inv[]) {
 }
 
 // ФУНКЦИЯ ПОИСКА ПРЕДМЕТА ПО НАЗВАНИЮ(Пункт 7)
-void search_item_by_name() {
+void search_item_by_name(struct Player* player, char item_names[][MAX_NAME_LEN]) {
 	char search_name[MAX_NAME_LEN];// Сюда запишем название для поиска
 	getchar();
 
@@ -95,7 +95,7 @@ void search_item_by_name() {
 	printf("Предмет '%s' (ID: %d) найден в слотах: ", search_name, target_id);
 	int found = 0;  // Флаг: нашли ли хоть один слот
 	for (int i = 0; i < Inventory_size; i++) {
-		if (inventory[i] == target_id) {
+		if (player->inventory[i] == target_id) {
 			printf("%d ", i);  // Печатаем номер слота
 			found = 1;         // Запоминаем, что нашли
 		}
@@ -106,6 +106,7 @@ void search_item_by_name() {
 	}
 	printf("\n");
 }
+
 	
 struct Player* create_player(const char* name) {
 	struct Player* player = (struct Player*)malloc(sizeof(struct Player));
@@ -123,6 +124,7 @@ struct Player* create_player(const char* name) {
 	player->x = 0;
 	player->y = 0;
 	player->map_count = 0;
+	player->map_drawn = 0;
 
 	for (int i = 0; i < Inventory_size; i++) {
 		player->inventory[i] = EMPTY_ITEM;

@@ -37,7 +37,7 @@ int main() {
 	int choice = -1;
 	while (1) {
 		printf("\n === МЕНЮ ФЕРМЕРА ===\n");
-		printf("Привет, %s! \n ", farmer_name);
+		printf("Привет, %s! \n ", player->farmer_name);
 		printf("[0] Выход\n"
 			"[1] Посмотреть на часы\n"
 			"[2] Промотать время(поработать)\n"

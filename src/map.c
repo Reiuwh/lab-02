@@ -1,6 +1,8 @@
 #include "map.h"
+#include"player.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <conio.h>
 
 
 // Функция для освобождения памяти (чтобы не было утечек)
@@ -69,15 +71,20 @@ struct Map* generate_dungeon(int depth) {
 	return map; // возвращаем готовую карту
 }
 // отрисовка карты на экране
-void print_map(struct Map* map) {
+void print_map(struct Map* map, struct Player* player) {
 	system("cls"); // Очищаем экран чтоб карта рисовалась поверх предыдущей
+
+	if (player!= NULL) {
+		printf("HP: %d/%d | Выносливость: %d/%d | Золот: %d | Время: %02d:00\n",
+			player->hp, player->max_hp, player->stamina, player->max_stamina, player->gold, current_hour);
+	}
 	printf("=== ПОДЗЕМЕЛЬЕ. Глубина: %d ===\n", map->depth);
 	if (map->biome == BIOME_FOREST) printf("Биом: Редколесье\n");
-	else if (map->biome == BIOME_SWAMP) printf("Биом: Топь\n");
+	else if (map->biome == BIOME_SWAMP) printf("Биом: Топь (стамина -2)\n");
 	else if (map->biome == BIOME_RUINS) printf("Биом: Каменные руины\n");
-	else printf("Биом: Кристальная пещера\n");
+	else printf("Биом: Кристальная пещера (золотп х3)\n");
 
-	printf("Управление: W (вверх), A (влево),S(вниз), D(вправо), Q(выход домой с лестницы U)\n\n");
+	printf("Управление: W/A/S/D -ходьба, M - зарисовать карту, Q(выход домой с лестницы U)\n\n");
 
 	for (int y = 0; y < map->height; y++) {
 		for (int x = 0; x < map->width; x++) {
@@ -107,13 +114,30 @@ void start_adventure(struct Player* player) {
 	map->field[map->hero_y][map->hero_x] = '@';
 
 	int game_over = 0;
+	int is_mapped = 0;//нарисована ли карта на этом этаже
 
 	while (!game_over) {
-		print_map(map);
+		print_map(map,player);
 
 		char key = _getch();
 		if (key >= 'a' && key <= 'z') key -= 32; //превращает маленькую букву в большую (разница в таблице символов 32), чтобы работали и w, и W
 
+		if (key == 'M') {
+			if (is_mapped) {
+				printf("\n Вы уже зарисовали карту этого этажа!(нажмите любую клавишу)\n");
+			}
+			else if (player->stamina < 5) {
+				printf("\n Не хватает выносливости!Нужно 5!!(нажмите любую клавишу)\n");
+			}
+			else {
+				player->stamina -= 5;
+				player->map_drawn++;
+				is_mapped = 1;
+				printf("\n Вы потратили 5 стамины и зарисовали карту!(Всего карт: %d)(нажмите любую клавишу)\n", player->map_drawn);
+			}
+			_getch();
+			continue;
+		}
 		if (key == 'Q') {
 			if (under == 'U') {   // выйти можно, только стоя на лестнице вверх
 				printf("\n Вы благополучно выбрались из подземелья!\n");
@@ -139,6 +163,14 @@ void start_adventure(struct Player* player) {
 
 		// если идти некуда, просто ждём следующую клавишу
 		if (is_blocked(map, new_x, new_y)) continue;
+
+		//расход стамины за шаг
+		int stamina_cost = 1;
+		if (map->biome == BIOME_SWAMP) {
+			stamina_cost = 2; // в топи шаг -2
+		}
+		player->stamina -= stamina_cost;
+
 
 		// возвращаем на старое место то, что там было
 		map->field[map->hero_y][map->hero_x] = under;
@@ -167,18 +199,37 @@ void start_adventure(struct Player* player) {
 
 		// Дошли до лестницы вниз: строим новый этаж
 		if (under == 'D') {
+			player->stamina -= 5;
+			current_hour++;
+			if (current_hour >= 24) { current_hour = 0;current_day++; }
+
+			int reward = 10 * map->depth;
+			if (map->biome == BIOME_CRYSTAL) reward *= 3;
+			player->gold += reward;
+
+			printf("\n Вы спустились на глубину %d!Получено %d золота. (нажмите клавишу)\n", map->depth + 1,reward);
+
 			free_map(map);   // старую карту больше не нужно хранить
 			depth++;
-
 			map = generate_dungeon(depth);
 
 			// cнова запоминаем, что под героем на новом этаже, и ставим его
 			under = map->field[map->hero_y][map->hero_x];
 			map->field[map->hero_y][map->hero_x] = '@';
-
+			is_mapped = 0; //можно рисовать карту снова
 			printf("\n Вы спустились на глубину %d!\n", depth);
 			_getch();
 			continue;
+		}
+		if (player->stamina <= 0 || current_hour == 2) {
+			printf("\n========================================================\n");
+			printf("Вы упали без сил! Спасательная служба доставила вас домой.\n");
+			printf("За услуги списана половина заработанного золота.\n");
+			printf("==========================================================\n");
+			player->gold /= 2;
+			player->stamina = 0;
+			game_over = 1;
+			_getch();
 		}
 
 		map->field[map->hero_y][map->hero_x] = '@';

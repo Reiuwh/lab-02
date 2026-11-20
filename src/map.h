@@ -8,7 +8,7 @@
 
 void free_map(struct Map* map);
 struct Map* generate_dungeon(int depth);
-void print_map(struct Map* map);
+void print_map(struct Map* map, struct Player* player);
 int is_blocked(struct Map* map, int x, int y);
 void start_adventure(struct Player* player);
 
