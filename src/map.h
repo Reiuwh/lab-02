@@ -4,6 +4,7 @@
 
 #define MIN_MAP_SIZE 5
 #define MAX_MAP_SIZE 30
+#define BASE_GOLD_REWARD 10
 
 
 void free_map(struct Map* map);

@@ -203,7 +203,7 @@ void start_adventure(struct GameState* game) {
 			game->current_hour++;
 			if (game->current_hour >= 24) { game->current_hour = 0;game->current_day++; }
 
-			int reward = 10 * map->depth;
+			int reward = BASE_GOLD_REWARD * map->depth;
 			if (map->biome == BIOME_CRYSTAL) reward *= 3;
 			game->player->gold += reward;
 

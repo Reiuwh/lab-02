@@ -35,7 +35,7 @@ int main() {
 			printf("Привет, %s! \n ", game.player->farmer_name);
 		}
 		else {
-			printf("Привет, путешественник!(персонаж пока не слздан)\n");
+			printf("Привет, путешественник!(персонаж пока не создан)\n");
 		}
 		
 		printf("[0] Выход\n"
@@ -58,7 +58,7 @@ int main() {
 		switch (choice) {
 		case 0:
 			printf("Выход из игры.До скорой встречи!\n");
-			destroy_player(game.player);
+			if (game.player != NULL) destroy_player(game.player);
 			return 0;
 		case 1:
 			game.player = recreate_player(game.player);
@@ -100,6 +100,17 @@ int main() {
 
 		case 11:
 			sell_maps(&game);
+			break;
+
+		case 12:
+			show_time(game.current_day, game.current_hour);
+
+		case 13:
+			skip_time(&game.current_day, &game.current_hour);
+			break;
+
+		case 14:
+			rest_and_sleep(&game);
 			break;
 
 		default:

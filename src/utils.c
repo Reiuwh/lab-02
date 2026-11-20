@@ -101,9 +101,16 @@ void skip_time(int* day, int* hour) {
 		return;
 	}
 	*hour += hours;
-	while (*hour >= 24) {
-		*hour -= 24;
-		(*day)++;
+
+	if (*hour >= 2 && *hour < 8 && hours > 0) {
+		printf("Вы слишком устали! Ночью нужно спать. \n");
+		*hour = 2; //ост время на 2 ч ночи
+	}
+	else {
+		while (*hour >= 24) {
+			*hour -= 24;
+			(*day)++;
+		}
 	}
 	printf("Вы поработали! Теперь: День %d, %02d:00\n", *day, *hour);
 }

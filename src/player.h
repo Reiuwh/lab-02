@@ -15,6 +15,7 @@ void clean_trash(int inv[]);
 void destroy_player(struct Player* player);
 void show_player_card(struct Player* player);
 void sell_maps(struct GameState* game);
+void rest_and_sleep(struct GameState* game);
 
 struct Player {
 	char farmer_name[MAX_NAME_LEN];
