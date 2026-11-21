@@ -143,7 +143,6 @@ struct Player* create_player(const char* name) {
 	player->gold = START_GOLD;
 	player->x = 0;
 	player->y = 0;
-	player->map_count = 0;
 	player->map_drawn = 0;
 
 	for (int i = 0; i < Inventory_size; i++) {
@@ -180,17 +179,30 @@ void destroy_player(struct Player* player){
 }
 
 //функция карточки персонажа
-void show_player_card(struct Player* player) {
-	if (player == NULL) {
-		printf("\n\n");
+void show_player_card(struct GameState* game) {
+	if (game->player == NULL) {
+		printf("\n Персонаж еще не создан! Выберите пункт [1]\n");
 		return;
 	}
 	printf("\n === КАРТОЧКА ПЕРСОНАЖА ===\n");
-	printf("Имя: %s\n", player->farmer_name);
-	printf("HP: %d/%d\n", player->hp, player->max_hp);
-	printf("Выносливость: %d/%d\n", player->stamina, player->max_stamina);
-	printf("Золото: %d\n", player->gold);
-	printf("Нарисовано карт: %d\n", player->map_drawn);
+	printf("Имя: %s\n", game->player->farmer_name);
+	printf("Время: День %d , %02d:00\n", game->current_day, game->current_hour);
+	printf("HP: %d/%d\n", game->player->hp, game->player->max_hp);
+	printf("Выносливость: %d/%d\n", game->player->stamina, game->player->max_stamina);
+	printf("Золото: %d\n", game->player->gold);
+	printf("Нарисовано карт: %d\n", game->player->map_drawn);
+	printf("---Инвентарь---\n");
+	int has_items = 0; //чтоб понять пустой рюкзак или нет
+	for (int i = 0; i < Inventory_size; i++) {
+		if (game->player->inventory[i] != EMPTY_ITEM) {
+			// берем ид предм из игрока и ищем его название в базе gamestate
+			printf("Слот %d: %s\n", i, game->item_names[game->player->inventory[i]]);
+			has_items = 1;
+		}
+	}
+	if (! has_items) {
+		printf("Пусто\n");
+	}
 	printf("=======================================\n");
 
 }

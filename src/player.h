@@ -13,7 +13,7 @@ void discard_item(int inv[]);
 void search_item_by_name();
 void clean_trash(int inv[]);
 void destroy_player(struct Player* player);
-void show_player_card(struct Player* player);
+void show_player_card(struct GameState* game);
 void sell_maps(struct GameState* game);
 void rest_and_sleep(struct GameState* game);
 
@@ -26,7 +26,6 @@ struct Player {
 	int gold;
 	int x, y;
 	int inventory[Inventory_size];
-	int map_count;
 	int map_drawn;
 };
 

@@ -55,6 +55,12 @@ int main() {
 			"[14] Лечь спать(отдых)\n");
 
 		choice = safe_input_int("Выберите пункт:");
+		
+		if (choice >= 3 && choice <= 11 && game.player == NULL) {
+			printf("\n Сначала создайте персонажа(пункт 1)!\n");
+			continue;
+		}
+
 		switch (choice) {
 		case 0:
 			printf("Выход из игры.До скорой встречи!\n");
@@ -64,7 +70,7 @@ int main() {
 			game.player = recreate_player(game.player);
 			break;
 		case 2:
-			show_player_card(game.player);
+			show_player_card(&game);
 			break;
 			
 		case 3:
