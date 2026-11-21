@@ -100,18 +100,32 @@ void skip_time(int* day, int* hour) {
 		printf(" Ошибка: количество часов не может быть отрицательным!\n");
 		return;
 	}
-	*hour += hours;
+	if (hours <= 0) {
+		printf("Количество часов от одного!\n");
+		return;
+	}
 
-	if (*hour >= 2 && *hour < 8 && hours > 0) {
+	if (*hour >= 2 && *hour < 8 ) {
 		printf("Вы слишком устали! Ночью нужно спать. \n");
-		*hour = 2; //ост время на 2 ч ночи
+		return;
+	}
+	int max_hours;
+	if (*hour >= 8) {
+		max_hours = (24 - *hour) + 2;
 	}
 	else {
-		while (*hour >= 24) {
-			*hour -= 24;
-			(*day)++;
-		}
+		max_hours = 2 - *hour;
 	}
+	if (hours > max_hours) {
+		printf("Вы слишком устали! Ночью нужно спать. \n");
+		hours = max_hours;
+	}
+
+	*hour += hours;
+	while(*hour >= 24){
+	*hour -= 24;
+	(*day)++;
+		}
 	printf("Вы поработали! Теперь: День %d, %02d:00\n", *day, *hour);
 }
 

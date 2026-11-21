@@ -79,7 +79,7 @@ void print_map(struct Map* map, struct GameState* game) {
 			game->player->hp, game->player->max_hp, game->player->stamina, game->player->max_stamina, game->player->gold, game->current_hour);
 	}
 	printf("=== ПОДЗЕМЕЛЬЕ. Глубина: %d ===\n", map->depth);
-	if (map->biome == BIOME_FOREST) printf("Биом: Редколесье\n");
+	if (map->biome == BIOME_FOREST) printf("Биом: Редколесье\n"); 
 	else if (map->biome == BIOME_SWAMP) printf("Биом: Топь (стамина -2)\n");
 	else if (map->biome == BIOME_RUINS) printf("Биом: Каменные руины\n");
 	else printf("Биом: Кристальная пещера (золотп х3)\n");
