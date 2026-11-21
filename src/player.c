@@ -8,10 +8,43 @@
 #include <time.h>  
 #include <conio.h> 
 
+void time_menu(struct GameState* game) {
+	int choice = -1;
+	while (choice != 0) {
+		printf("\n ---УПРАВЛЕНИЕ ВРЕМЕНЕМ---\n");
+		printf("[0] Вернуться в меню\n");
+		printf("[1] Посмотреть на часы\n");
+		printf("[2] Пропустить время\n");
+		printf("[3] Лечь спать\n");
+
+		choice = safe_input_int("Выберите действие:");
+
+		switch (choice) {
+		case 0:
+			printf("Возврат в главное меню...\n");
+			break;
+		case 1:
+			show_time(game->current_day, game->current_hour);
+
+		case 2:
+			skip_time(&game->current_day, &game->current_hour);
+			break;
+
+		case 3:
+			rest_and_sleep(game);
+			break;
+		default:
+			printf("Такого пункта нет!\n ");
+			break;
+		}
+	}
+
+
+}
 void sell_maps(struct GameState* game) {
 	if (game->player->map_drawn == 0) {
-		printf("\n У вас нет карт для продажи.\n");
-		return;
+	printf("\n У вас нет карт для продажи.\n");
+	return;
 	}
 	int total_gold = game->player->map_drawn * 50;
 	game->player->gold += total_gold;

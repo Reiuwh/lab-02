@@ -50,13 +50,11 @@ int main() {
 			"[9] Обработать письмо NPC\n"
 			"[10] Отправиться в приключение (Подземелье)\n"
 			"[11] Продать карты\n"// новый пункт
-			"[12] Посмотреть на часы\n"
-			"[13] Пропустить время\n"
-			"[14] Лечь спать(отдых)\n");
+			"[12] Управление временем\n");
 
 		choice = safe_input_int("Выберите пункт:");
 		
-		if (choice >= 3 && choice <= 11 && game.player == NULL) {
+		if (choice >= 3 && choice <= 12 && game.player == NULL) {
 			printf("\n Сначала создайте персонажа(пункт 1)!\n");
 			continue;
 		}
@@ -109,14 +107,7 @@ int main() {
 			break;
 
 		case 12:
-			show_time(game.current_day, game.current_hour);
-
-		case 13:
-			skip_time(&game.current_day, &game.current_hour);
-			break;
-
-		case 14:
-			rest_and_sleep(&game);
+			time_menu(&game);
 			break;
 
 		default:
